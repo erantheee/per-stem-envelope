@@ -7,7 +7,7 @@ name = "stemenvelope"
 version = "0.1.0"
 description = "Noise-aware per-stem dynamic envelope: content-gated, per-band, attack/release smoothed gain on separated stems."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "erantheee" }]
 keywords = ["audio", "source-separation", "stems", "dynamic-eq", "envelope", "dsp"]

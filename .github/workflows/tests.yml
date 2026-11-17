@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.12"]
+        python-version: ["3.11", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,4 +25,4 @@ jobs:
       - name: Demo runs
         run: python examples/synthetic_demo.py --out build
       - name: No third-party media committed
-        run: git ls-files | grep -Ei '\.(wav|flac|mp3|ogg|onnx|rknn|pt|pth)$' && exit 1 || exit 0
+        run: "! git ls-files | grep -Ei '\\.(wav|flac|mp3|ogg|onnx|rknn|pt|pth)$'"
