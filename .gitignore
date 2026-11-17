@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+
+# Never commit third-party audio or model weights (see DATA_POLICY.md).
+*.wav
+*.flac
+*.mp3
+*.ogg
+*.onnx
+*.rknn
+*.pt
+*.pth

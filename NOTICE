@@ -1,0 +1,23 @@
+NOTICE
+======
+
+This repository contains only original source code and procedurally generated
+test signals. It does **not** redistribute any third-party audio recording,
+any pre-trained model, or any dataset sample.
+
+Runtime dependency
+------------------
+numpy — BSD 3-Clause, https://numpy.org (not vendored, installed by pip)
+
+Optional external material, NOT included and NOT required
+---------------------------------------------------------
+* Slakh2100 / BabySlakh — CC BY 4.0, https://zenodo.org/records/4603870
+  (synthesised multitrack audio; usable for objective comparison, attribution
+  required. Download out-of-band; never commit the audio.)
+* MUSDB18 / MUSDB18-HQ — educational, non-commercial only, and partially
+  CC BY-NC-SA (MedleyDB). Not used here, must not be added here.
+* Demucs — source MIT, pre-trained weights CC-BY-NC 4.0. Weights and any
+  separation output derived from them must not be committed to this repository.
+
+If you add any of the above to your own fork, update this file with the source,
+license and required attribution.
