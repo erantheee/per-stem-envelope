@@ -3,7 +3,8 @@
 分轨之后，按**每条轨自己在哪些频段有内容**，逐频段动态调整包络。
 
 房间变吵时，把"某条轨"在某些频段上推一点/压一点——而不是把一条 EQ 曲线糊在整个混音上。
-纯 numpy，无模型、无音频 I/O、无传输层。MIT。
+纯 numpy 核心。**代码 MIT，权重另有许可**（其中分轨权重是研究用途，见
+[weights/LICENSE-WEIGHTS.md](weights/LICENSE-WEIGHTS.md)）。无音频 I/O、无传输层。
 
 ## 它解决什么
 
@@ -22,7 +23,8 @@
 
 ```bash
 pip install -e ".[dev]"
-pytest -q                     # 55 个测试
+pytest -q                     # 92 个测试
+make -C variants/s3 check     # C 版与 Python 参考实现对比（12 步，1e-6 dB）
 python examples/synthetic_demo.py
 ```
 
@@ -38,6 +40,20 @@ per-stem gain (peak |dB|) and the bands that moved (> 0.1 dB):
 ```
 
 这张表就是全部卖点：四条轨、四组不同频段、来自同一条曲线。
+
+## 三套方案
+
+核心与硬件无关，所以同一套算法落到三类机器上。每个方案都是适配层，不是分叉。
+
+| 方案 | 跑在哪 | 模型 | 状态 |
+|---|---|---|---|
+| [`variants/s3/`](variants/s3/) | ESP32-S3 | ContextNet 92-32-16-9（3,657 参数，3,600 MACs）做情境判断；**不含分轨** | C99 包络执行器 + numpy 参考实现，`make check` 与 Python 对拍 |
+| [`variants/khadas/`](variants/khadas/) | Edge2 / RK3588 RKNPU | BandSplitNet 六轨（554k 参数）+ DMIC 证据 | 板端 JSON 契约（evidence / control / telemetry）+ fail-open 适配 |
+| [`variants/host/`](variants/host/) | 上位机 macOS/PC | — | 档位 → `/tmp/tuning-control.json`，带过期门控的遥测读取 |
+
+S3 上为什么没有分轨：六轨模型要 4 s 窗的 STFT，int8 在 RKNPU 上仍要 3.4 s/窗且 mask
+失真 0.178（不可用）。ESP32-S3 比这低两个数量级。所以 S3 方案假设分轨在系统侧完成；
+如果一定要单独跑，就 `n_stems = 1` 把整条混音当一个 stem，门控退化为"该频段有没有内容"。
 
 ## 用法
 
@@ -118,8 +134,12 @@ result.mix, result.gains_db, result.peak_gain_db
 
 ## 数据与许可（重点）
 
-- **本仓库不再分发任何第三方音频、不含任何模型权重。** demo 由
-  `examples/synthetic_demo.py` 生成。
+- **本仓库不分发任何第三方音频。** demo 由 `examples/synthetic_demo.py` 生成。
+- **权重按许可分开**（`weights/LICENSE-WEIGHTS.md`）：`contextnet_v0.2-s3.*` 是 MIT
+  （自采 DMIC 录音训练）；`six_stem_band_split.pt` / `six_stem_rk-6s.onnx` 是
+  **CC BY-NC 4.0 研究用途**（MUSDB18-HQ 混音 + htdemucs_6s 伪标签训练），不可商用，
+  也不能被标成 MIT。每个二进制的 sha256 钉在 `weights/MANIFEST.json`，
+  `tests/test_weights.py` 会在漂移时失败。
 - MUSDB18-HQ 是**仅教育用途、非商用**，且含 MedleyDB（CC BY-NC-SA）素材。
   这里没有任何东西来自它，也不允许加进来。规则与合法替代素材见
   [DATA_POLICY.md](DATA_POLICY.md)：Slakh2100 / BabySlakh 是 CC BY 4.0。

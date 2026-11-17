@@ -6,12 +6,24 @@ dist/
 .venv/
 .pytest_cache/
 
-# Never commit third-party audio or model weights (see DATA_POLICY.md).
+# C parity binary
+variants/s3/tests/parity
+*.o
+
+# Audio is never committed anywhere: see DATA_POLICY.md.
 *.wav
 *.flac
 *.mp3
 *.ogg
+*.m4a
+
+# Model weights: only under weights/, and only when declared in
+# weights/MANIFEST.json with a licence tag (see weights/LICENSE-WEIGHTS.md).
 *.onnx
 *.rknn
 *.pt
 *.pth
+*.ckpt
+*.safetensors
+!weights/*.onnx
+!weights/*.pt

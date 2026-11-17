@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "note": "Every binary in this directory is listed here with its sha256, task and licence. Code is MIT; weights carry their own licence (see LICENSE-WEIGHTS.md). Nothing here may be relabelled as MIT.",
+  "artifacts": [
+    {
+      "path": "weights/contextnet_v0.2-s3.json",
+      "derived_from": "weights/contextnet_v0.2-s3.pt",
+      "role": "plain-JSON export so the S3/Python side needs no torch",
+      "sha256": "616602d850052239f0b64530f499a014675216141fe3d3a602a88be4861254b6"
+    },
+    {
+      "path": "weights/contextnet_v0.2-s3.pt",
+      "name": "ContextNet v0.2-s3",
+      "target": "esp32-s3",
+      "task": "ambient context classification, 9 classes at 10 Hz",
+      "params": 3657,
+      "macs_per_inference": 3600,
+      "input": "92-dim window feature vector (24-band frames at 10 Hz)",
+      "classes": ["babble", "horn", "music", "near_voice", "other", "quiet", "steady", "street", "wind"],
+      "sha256": "a7bdc4b21f83d3a8b0c165ee67f45092ca0cc12fd285321a17ef9880e0fadb9b",
+      "license": "MIT",
+      "commercial_use": true,
+      "training_data": "self-recorded DMIC logs only (记录/房间本底, 记录/键盘风声); no third-party dataset",
+      "origin": "cores3-noise-adapt-demo@experiments/listening-model/artifacts/model_v0.2-s3.pt"
+    },
+    {
+      "path": "weights/six_stem_band_split.pt",
+      "name": "BandSplitNet 6-stem (rk_net, base=96, layers=4)",
+      "target": "khadas edge2 (RK3588 RKNPU) / exportable to onnx",
+      "task": "6-stem music separation: vocals/drums/bass/guitar/piano/other",
+      "params": 554158,
+      "input": "waveform, log1p front-end, 6 s training segments",
+      "sha256": "df717ea9ee1e8e1fc09415043cf4c8f8b7c2d5c3648ea39508ed0b9da4ede485",
+      "license": "CC-BY-NC-4.0 (research only)",
+      "commercial_use": false,
+      "training_data": "MUSDB18-HQ mixes + htdemucs_6s pseudo-labels (both non-commercial)",
+      "origin": "cores3-noise-adapt-demo@tools/stem-ab-training/artifacts/six_stem/band_split_six.pt"
+    },
+    {
+      "path": "weights/six_stem_rk-6s.onnx",
+      "name": "BandSplitNet 6-stem, ONNX reference export",
+      "target": "khadas edge2; convert to .rknn on the device with the RKNN toolkit",
+      "task": "same model as six_stem_band_split.pt",
+      "params": 554158,
+      "input": "[1, 2, 1025, 345] (4.005 s window @44.1 kHz, 512 hop)",
+      "sha256": "c0c823c83e74af2aae4cb49e5f016b2d05a49e236f97cd5fa51a9ff661662316",
+      "license": "CC-BY-NC-4.0 (research only)",
+      "commercial_use": false,
+      "training_data": "derived from weights/six_stem_band_split.pt",
+      "origin": "khadas-ows-node@models/six/rk-6s.onnx",
+      "note": "The 24 MB fp16 .rknn build is intentionally NOT committed: it is device-specific, rebuildable from this ONNX, and would triple the repo size."
+    }
+  ]
+}

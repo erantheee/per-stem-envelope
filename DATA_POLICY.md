@@ -2,7 +2,8 @@
 
 这个文件是给"要把它发到公司内部"这件事写的操作手册。核心结论：
 
-> **公开仓库里不放任何第三方音频、不放任何模型权重、不引用任何非商用数据集的评测数字。**
+> **公开仓库里不放任何第三方音频；模型权重只能放在 `weights/` 并单独标注许可。**
+> 代码是 MIT，权重不是——分轨权重是研究用途（NC），不可商用。
 > 算法本身与 MUSDB 无关，所以这不是妥协，是把两件事分开。
 
 ## 1. 四条硬规则
@@ -10,12 +11,12 @@
 | # | 规则 | 为什么 |
 |---|---|---|
 | 1 | 不提交 `.wav/.flac/.mp3/.ogg` 等音频 | 仓库是公开的，等于再分发；LFS 也一样 |
-| 2 | 不提交 `.onnx/.rknn/.pt/.pth` 权重 | 权重训练数据往往是非商用许可，且体积与许可都不受你的控制 |
+| 2 | 权重**只能**放 `weights/`，且必须在 `weights/MANIFEST.json` 登记 sha256、许可、训练数据 | 让"哪部分是 MIT、哪部分不可商用"在目录结构上不可混淆 |
 | 3 | README / 文档里不出现非商用数据集的评测数字 | "SDR 2.64 on MUSDB" 这类数字本身就是衍生使用 |
 | 4 | 演示素材必须可再生 | 合成信号（`examples/synthetic_demo.py`）或 CC0/CC-BY 素材，附署名 |
 
-规则 1/2 由 `tests/test_data_policy.py` 在 CI 里强制执行：一旦有人提交音频或
-权重，测试直接失败。
+规则 1/2 由 `tests/test_data_policy.py` 与 `tests/test_weights.py` 在 CI 里强制执行：
+提交音频、把权重放在 `weights/` 之外、或权重未登记，测试直接失败。
 
 ## 2. 为什么 MUSDB18-HQ 不能用
 
@@ -54,16 +55,28 @@ Slakh 许可依据：[Zenodo Slakh2100 / BabySlakh](https://zenodo.org/records/4
 
 ## 5. 模型权重
 
-本仓库不含任何权重，也不需要。如果你以后要加一个可选的分离器：
+本仓库的权重分两类，逐一见 `weights/LICENSE-WEIGHTS.md`：
 
-* Demucs 代码 MIT，但**预训练权重是 CC-BY-NC 4.0**；
-* 任何基于 MUSDB 训练的权重都不能随公开仓库分发；
-* 想商用就走：自采多轨训练 / 商业分轨 API / 无神经网络的分频段方案。
+| 权重 | 许可 | 可商用 | 训练数据 |
+|---|---|---|---|
+| `contextnet_v0.2-s3.*` | MIT | 可以 | 自采 DMIC 录音 |
+| `six_stem_band_split.pt` | CC BY-NC 4.0（研究） | **不可以** | MUSDB18-HQ + htdemucs_6s 伪标签 |
+| `six_stem_rk-6s.onnx` | 同上 | **不可以** | 由上一项导出 |
+
+**代码 MIT 不覆盖权重。** 想拿到可商用的分轨权重只有三条路：
+
+* 自采多轨重训（推荐，数据权在自己手里）；
+* 商业分轨 API / 商业授权权重；
+* 不用神经网络的分频段方案。
+
+Demucs 代码是 MIT，但**预训练权重是 CC-BY-NC 4.0**；任何基于 MUSDB 训练的权重都不能
+随公开仓库做商用分发。
 
 ## 6. 提交前检查清单
 
-- [ ] `git status` 里没有 `*.wav/*.onnx/*.pt`
-- [ ] `pytest -q` 通过（含 `test_data_policy`）
+- [ ] `git status` 里没有 `*.wav`
+- [ ] 新增权重放在 `weights/`，并更新 `weights/MANIFEST.json` 与 `LICENSE-WEIGHTS.md`
+- [ ] `pytest -q` 与 `make -C variants/s3 check` 通过
 - [ ] README 里没有非商用数据集的数字
 - [ ] 新增的演示素材要么是合成信号，要么有明确的 CC0/CC-BY 署名
 - [ ] 若引用了外部数据集，在 `NOTICE` 里写清来源与许可
