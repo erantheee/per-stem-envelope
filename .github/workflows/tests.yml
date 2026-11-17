@@ -26,5 +26,8 @@ jobs:
         run: make -C variants/s3 check
       - name: Demo runs
         run: python examples/synthetic_demo.py --out build
-      - name: No third-party media committed
-        run: "! git ls-files | grep -Ei '\\.(wav|flac|mp3|ogg|onnx|rknn|pt|pth)$'"
+      # Audio is forbidden outright; weights are allowed only under weights/ and
+      # only when declared in weights/MANIFEST.json — tests/test_weights.py owns
+      # that rule, this is the coarse shell-level guard.
+      - name: No audio committed
+        run: "! git ls-files | grep -Ei '\\.(wav|flac|mp3|ogg|m4a)$'"
